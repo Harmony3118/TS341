@@ -2,20 +2,8 @@
 name = "ts341"
 version = "0.1.0"
 description = "A python package for TS341"
-authors = [
-    {
-        name = "Pauline Prost--Waterson", email = "pprostwater@ensc.fr"
-    },
-    {
-        name = "Anaelle Jaffre", email = "anaelle.jaffre@ensc.fr"
-    },
-    {
-        name = "Thomas Wanchai MENIER", email = "wanchai.menier@gmail.com"
-    },
-    {
-        name = "Antonin de Bouter", email = "adebouter@enseirb-matmeca.fr"
-    }
-]
+authors = []
+
 readme = "README.md"
 packages = [{include = "ts341_project"},
             {include = "ts341_example"}]
@@ -27,9 +15,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.dependencies]
 python = "^3.10"
 opencv-python = "^4.10"
+Flask = "^3.1.2"
 
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.dev-dependencies]
 pytest = "^7.4"
 
 [tool.poetry.scripts]
-main = ""
+main = "ts341.app:main"
