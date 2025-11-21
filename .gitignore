@@ -1,6 +1,6 @@
 ts341_example/
 videos/
-poetry.lock
+best_yolo8s.pt
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
