@@ -1,4 +1,4 @@
-name: Black linter
+name: Pytest
 
 on:
   pull_request:
