@@ -8,7 +8,9 @@ on:
 jobs:
   pylint:
     if: github.event.pull_request.draft == false
-    runs-on: cytopia/mypy
+    runs-on: ubuntu-latest
+    container:
+      image: cytopia/mypy
     strategy:
       matrix:
         python-version: ["3.10"]
