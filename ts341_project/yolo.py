@@ -23,15 +23,15 @@ def main():
 
         # Run YOLOv8 inference on the frame
 
-        results = model(frame, show=False)  # disable YOLOv8 window
+        results = model(frame, show=False, tracker="bytetrack.yaml")  # disable YOLOv8 window + use ByteTrack for tracking
         annotated_frame = results[0].plot()
         annotated_frame = cv2.resize(annotated_frame, (1920, 1080))
         cv2.imshow("YOLOv8 Detection", annotated_frame)
 
         # Optional: access detection results programmatically
-        # for result in results:
-        #     boxes = result.boxes
-        #     print(boxes.xyxy, boxes.cls, boxes.conf)
+        for result in results:
+            boxes = result.boxes
+            print(f"Coords: {boxes.xyxy}, \nBox id: {boxes.cls}, \nConfidence: {boxes.conf}")
 
         # Press 'q' to quit
         if cv2.waitKey(1) & 0xFF == ord('q'):
