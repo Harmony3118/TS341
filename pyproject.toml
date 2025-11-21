@@ -4,6 +4,8 @@ version = "0.1.0"
 description = "A python package for TS341"
 authors = []
 
+authors = [
+]
 readme = "README.md"
 packages = [{include = "ts341_project"},
             {include = "ts341_example"}]
@@ -14,8 +16,10 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-opencv-python = "^4.10"
-Flask = "^3.1.2"
+flask = "^2.3.3"
+opencv-python = "^4.12"
+matplotlib = "^3.10.7"
+ultralytics = "^8.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.4"
