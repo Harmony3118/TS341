@@ -1,4 +1,6 @@
 ts341_example/
+videos/
+poetry.lock
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
