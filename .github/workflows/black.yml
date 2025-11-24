@@ -1,0 +1,21 @@
+name: Black linter
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pylint:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    container:
+      image: cytopia/black
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Check codestyle
+      run: |
+        black --check $(find . -name '*.py')
