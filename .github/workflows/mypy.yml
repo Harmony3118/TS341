@@ -15,7 +15,7 @@ jobs:
       matrix:
         python-version: ["3.10"]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v4
     - name: Static type check
       run: |
         mypy $(git ls-files '*.py')
