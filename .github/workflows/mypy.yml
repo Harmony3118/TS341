@@ -1,0 +1,21 @@
+name: MyPy static type check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pylint:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    container:
+      image: cytopia/mypy
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Static type check
+      run: |
+        mypy $(find . -name '*.py')
