@@ -2,14 +2,15 @@ from ultralytics import YOLO
 from pathlib import Path
 import shutil
 
+
 # finetune_yolo.py - CPU optimized version
 def finetune_on_custom_data(
     pretrained_weights="best_yolo8s.pt",
     data_yaml="datasets/my_drones/my_drones_final/data.yaml",
-    epochs=50,              # Reduced from 100
-    batch_size=8,           # Reduced from 16
+    epochs=50,  # Reduced from 100
+    batch_size=8,  # Reduced from 16
     imgsz=640,
-    project_name="drone_finetune"
+    project_name="drone_finetune",
 ):
     """
     Fine-tune existing drone detection model on your custom data
@@ -41,7 +42,7 @@ def finetune_on_custom_data(
         imgsz=imgsz,
         batch=batch_size,
         name=project_name,
-        patience=15,            # Reduced patience
+        patience=15,  # Reduced patience
         save=True,
         save_period=10,
         lr0=0.001,
@@ -55,12 +56,12 @@ def finetune_on_custom_data(
         flipud=0.0,
         fliplr=0.5,
         mosaic=1.0,
-        device='cpu',           # CPU training
-        workers=4,              # Reduced workers
+        device="cpu",  # CPU training
+        workers=4,  # Reduced workers
         cache=True,
         val=True,
         plots=True,
-        project='runs/detect',
+        project="runs/detect",
         exist_ok=True,
         pretrained=False,
         verbose=True,
@@ -83,6 +84,7 @@ def finetune_on_custom_data(
 
     return str(best_model_path)
 
+
 def validate_model(model_path, data_yaml):
     """Validate the fine-tuned model"""
     print("\n" + "=" * 70)
@@ -101,6 +103,7 @@ def validate_model(model_path, data_yaml):
 
     return metrics
 
+
 def test_on_video(model_path, video_path):
     """Quick test on a video"""
     print("\n" + "=" * 70)
@@ -112,14 +115,15 @@ def test_on_video(model_path, video_path):
     # Run inference on video
     results = model.predict(
         source=video_path,
-        save=True,              # Save annotated video
-        conf=0.25,              # Confidence threshold
-        project='runs/detect',
-        name='test_video'
+        save=True,  # Save annotated video
+        conf=0.25,  # Confidence threshold
+        project="runs/detect",
+        name="test_video",
     )
 
     print(f"✓ Results saved to: runs/detect/test_video")
     print("=" * 70)
+
 
 if __name__ == "__main__":
     # Fine-tune the model

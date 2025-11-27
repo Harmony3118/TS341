@@ -1,11 +1,12 @@
 from pathlib import Path
 import shutil
 
+
 def remove_unlabeled_images(dataset_dir):
     """Remove images that have empty label files"""
     dataset_path = Path(dataset_dir)
 
-    for split in ['train', 'valid']:
+    for split in ["train", "valid"]:
         print(f"\nCleaning {split} set...")
 
         img_dir = dataset_path / split / "images"
@@ -38,6 +39,7 @@ def remove_unlabeled_images(dataset_dir):
         print(f"  Kept: {kept} images")
         print(f"  Removed: {removed_images} images, {removed_labels} empty labels")
 
+
 def verify_remaining_dataset(dataset_dir):
     """Show stats after cleaning"""
     dataset_path = Path(dataset_dir)
@@ -46,7 +48,7 @@ def verify_remaining_dataset(dataset_dir):
     print("CLEANED DATASET SUMMARY")
     print("=" * 60)
 
-    for split in ['train', 'valid']:
+    for split in ["train", "valid"]:
         img_dir = dataset_path / split / "images"
         lbl_dir = dataset_path / split / "labels"
 
@@ -56,7 +58,7 @@ def verify_remaining_dataset(dataset_dir):
         # Count annotations
         total_annotations = 0
         for lbl in labels:
-            with open(lbl, 'r') as f:
+            with open(lbl, "r") as f:
                 total_annotations += len([l for l in f.readlines() if l.strip()])
 
         print(f"\n{split.upper()}:")
@@ -66,6 +68,7 @@ def verify_remaining_dataset(dataset_dir):
 
         if len(images) < 10:
             print(f"  ⚠️  WARNING: Very few images! You need more labeled data.")
+
 
 if __name__ == "__main__":
     remove_unlabeled_images("datasets/my_drones/my_drones_final")

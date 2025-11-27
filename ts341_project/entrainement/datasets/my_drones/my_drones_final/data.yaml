@@ -1,4 +1,4 @@
-path: /home/antonin-de-bouter/Documents/robotique/TS341/ts341_project/Anto/datasets/my_drones/my_drones_final
+path: /home/antonin-de-bouter/Documents/robotique/TS341/ts341_project/entrainement/datasets/my_drones/my_drones_final
 train: train/images
 val: valid/images
 

@@ -2,6 +2,7 @@ import cv2
 from pathlib import Path
 import numpy as np
 
+
 def extract_frames(video_path, output_dir, interval_seconds=2):
     """Extract frames from video at regular intervals"""
 
@@ -35,6 +36,7 @@ def extract_frames(video_path, output_dir, interval_seconds=2):
     print(f"Extracted {saved_count} frames from {video_path.name}")
     return saved_count
 
+
 def extract_all_videos(videos_dir, output_dir, interval_seconds=2):
     """Extract frames from all videos in directory"""
     videos_dir = Path(videos_dir)
@@ -52,9 +54,10 @@ def extract_all_videos(videos_dir, output_dir, interval_seconds=2):
 
     print(f"\nTotal: {total_frames} frames extracted")
 
+
 if __name__ == "__main__":
     extract_all_videos(
         videos_dir="videos",
         output_dir="datasets/my_drones/unlabeled_frames",
-        interval_seconds=1  # Extract 1 frame every seconds
+        interval_seconds=1,  # Extract 1 frame every seconds
     )

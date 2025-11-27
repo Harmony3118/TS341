@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 def fix_label_classes(dataset_dir):
     """
     Fix label files that have incorrect class IDs
@@ -7,7 +8,7 @@ def fix_label_classes(dataset_dir):
     """
     dataset_path = Path(dataset_dir)
 
-    for split in ['train', 'valid']:
+    for split in ["train", "valid"]:
         lbl_dir = dataset_path / split / "labels"
 
         if not lbl_dir.exists():
@@ -22,7 +23,7 @@ def fix_label_classes(dataset_dir):
         removed_count = 0
 
         for lbl_file in label_files:
-            with open(lbl_file, 'r') as f:
+            with open(lbl_file, "r") as f:
                 lines = f.readlines()
 
             if not lines:
@@ -50,14 +51,14 @@ def fix_label_classes(dataset_dir):
                 class_id, x, y, w, h = parts
 
                 # Convert any class ID to 0
-                if class_id != '0':
-                    class_id = '0'
+                if class_id != "0":
+                    class_id = "0"
                     changed = True
 
                 new_lines.append(f"{class_id} {x} {y} {w} {h}\n")
 
             if changed:
-                with open(lbl_file, 'w') as f:
+                with open(lbl_file, "w") as f:
                     f.writelines(new_lines)
                 fixed_count += 1
 
@@ -68,6 +69,7 @@ def fix_label_classes(dataset_dir):
     print("LABELS FIXED!")
     print("=" * 60)
 
+
 def verify_labels(dataset_dir):
     """Verify all labels are correct now"""
     dataset_path = Path(dataset_dir)
@@ -76,7 +78,7 @@ def verify_labels(dataset_dir):
     print("VERIFICATION")
     print("=" * 60)
 
-    for split in ['train', 'valid']:
+    for split in ["train", "valid"]:
         lbl_dir = dataset_path / split / "labels"
 
         if not lbl_dir.exists():
@@ -89,7 +91,7 @@ def verify_labels(dataset_dir):
         issues = []
 
         for lbl_file in label_files:
-            with open(lbl_file, 'r') as f:
+            with open(lbl_file, "r") as f:
                 for line_num, line in enumerate(f, 1):
                     parts = line.strip().split()
                     if len(parts) != 5:
@@ -101,12 +103,16 @@ def verify_labels(dataset_dir):
                         x, y, w, h = map(float, parts[1:])
 
                         # Check ranges
-                        if not (0 <= x <= 1 and 0 <= y <= 1 and 0 <= w <= 1 and 0 <= h <= 1):
+                        if not (
+                            0 <= x <= 1 and 0 <= y <= 1 and 0 <= w <= 1 and 0 <= h <= 1
+                        ):
                             issues.append(f"{lbl_file.name}:{line_num} - Out of bounds")
                             continue
 
                         if class_id != 0:
-                            issues.append(f"{lbl_file.name}:{line_num} - Class ID {class_id} (should be 0)")
+                            issues.append(
+                                f"{lbl_file.name}:{line_num} - Class ID {class_id} (should be 0)"
+                            )
                             continue
 
                         total_annotations += 1
@@ -128,6 +134,7 @@ def verify_labels(dataset_dir):
                 print(f"    ... and {len(issues) - 10} more")
         else:
             print(f"  ✓ All labels valid!")
+
 
 if __name__ == "__main__":
     fix_label_classes("datasets/my_drones/my_drones_final")

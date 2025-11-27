@@ -4,6 +4,7 @@ import shutil
 import zipfile
 import tempfile
 
+
 def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
     """
     Merge multiple Label Studio YOLO exports into one dataset
@@ -18,7 +19,7 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
     original_images_path = Path(original_images_dir)
 
     # Create output structure
-    for split in ['images', 'labels']:
+    for split in ["images", "labels"]:
         (output_path / split).mkdir(parents=True, exist_ok=True)
 
     # Find all export ZIPs
@@ -50,7 +51,7 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
 
         # Extract to temp directory
         with tempfile.TemporaryDirectory() as temp_dir:
-            with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+            with zipfile.ZipFile(zip_file, "r") as zip_ref:
                 zip_ref.extractall(temp_dir)
 
             temp_path = Path(temp_dir)
@@ -59,7 +60,7 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
             labels_src = None
 
             # Common patterns for labels
-            for pattern in ['labels', 'train/labels', 'valid/labels']:
+            for pattern in ["labels", "train/labels", "valid/labels"]:
                 candidate = temp_path / pattern
                 if candidate.exists():
                     labels_src = candidate
@@ -72,7 +73,9 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
                     labels_src = lbls[0].parent
 
             if labels_src and labels_src.exists():
-                labels = [l for l in labels_src.glob("*.txt") if l.name != "classes.txt"]
+                labels = [
+                    l for l in labels_src.glob("*.txt") if l.name != "classes.txt"
+                ]
 
                 for lbl in labels:
                     # Label Studio adds a prefix to filenames, remove it
@@ -85,7 +88,7 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
                         new_img_name = lbl.stem + ".jpg"
                         shutil.copy(
                             original_images_map[img_name_jpg],
-                            output_path / "images" / new_img_name
+                            output_path / "images" / new_img_name,
                         )
                         total_images += 1
                     elif img_name_png in original_images_map:
@@ -93,7 +96,7 @@ def extract_and_merge_exports(exports_dir, output_dir, original_images_dir):
                         new_img_name = lbl.stem + ".png"
                         shutil.copy(
                             original_images_map[img_name_png],
-                            output_path / "images" / new_img_name
+                            output_path / "images" / new_img_name,
                         )
                         total_images += 1
                     else:
@@ -128,12 +131,13 @@ val: images  # Will split later
 names:
   0: drones
 """
-    with open(output_path / "data.yaml", 'w') as f:
+    with open(output_path / "data.yaml", "w") as f:
         f.write(yaml_content)
 
     print(f"✓ Created data.yaml")
 
     return total_images, total_labels
+
 
 def split_into_train_valid(merged_dir, train_ratio=0.8):
     """Split merged dataset into train and valid"""
@@ -200,9 +204,7 @@ def split_into_train_valid(merged_dir, train_ratio=0.8):
 
     # Split
     train_pairs, valid_pairs = train_test_split(
-        labeled_pairs,
-        train_size=train_ratio,
-        random_state=42
+        labeled_pairs, train_size=train_ratio, random_state=42
     )
 
     print(f"Train: {len(train_pairs)}")
@@ -210,7 +212,7 @@ def split_into_train_valid(merged_dir, train_ratio=0.8):
 
     # Create directories
     final_path = merged_path.parent / "my_drones_final"
-    for split in ['train', 'valid']:
+    for split in ["train", "valid"]:
         (final_path / split / "images").mkdir(parents=True, exist_ok=True)
         (final_path / split / "labels").mkdir(parents=True, exist_ok=True)
 
@@ -232,23 +234,21 @@ val: valid/images
 names:
   0: drones
 """
-    with open(final_path / "data.yaml", 'w') as f:
+    with open(final_path / "data.yaml", "w") as f:
         f.write(yaml_content)
 
     print(f"\n✓ Final dataset ready: {final_path}")
     print(f"{'='*60}")
+
 
 if __name__ == "__main__":
     # Step 1: Merge all labeled batches
     result = extract_and_merge_exports(
         exports_dir="datasets/my_drones/label_studio_exports",
         output_dir="datasets/my_drones/merged",
-        original_images_dir="datasets/my_drones/unlabeled_frames"
+        original_images_dir="datasets/my_drones/unlabeled_frames",
     )
 
     # Step 2: Split into train/valid (only if merge succeeded)
     if result:
-        split_into_train_valid(
-            merged_dir="datasets/my_drones/merged",
-            train_ratio=0.8
-        )
+        split_into_train_valid(merged_dir="datasets/my_drones/merged", train_ratio=0.8)

@@ -2,6 +2,7 @@
 from pathlib import Path
 import shutil
 
+
 def split_into_batches(images_dir, output_dir, batch_size=100):
     """Split images into small batches for easy upload"""
     images_dir = Path(images_dir)
@@ -22,7 +23,7 @@ def split_into_batches(images_dir, output_dir, batch_size=100):
         batch_dir = output_dir / f"batch_{batch_num:02d}"
         batch_dir.mkdir(exist_ok=True)
 
-        batch_images = images[i:i+batch_size]
+        batch_images = images[i : i + batch_size]
 
         for img in batch_images:
             shutil.copy(img, batch_dir / img.name)
@@ -36,9 +37,10 @@ def split_into_batches(images_dir, output_dir, batch_size=100):
     print(f"3. Label the images")
     print(f"4. Move to next batch")
 
+
 if __name__ == "__main__":
     split_into_batches(
         images_dir="ts341_project/Anto/datasets/my_drones/unlabeled_frames",
         output_dir="ts341_project/Anto/datasets/my_drones/batches_for_upload",
-        batch_size=100  # Small batches = stable uploads
+        batch_size=100,  # Small batches = stable uploads
     )
