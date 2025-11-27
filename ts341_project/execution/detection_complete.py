@@ -3,14 +3,16 @@
 from ultralytics import YOLO
 import cv2
 import numpy as np
-import os
 from pathlib import Path
 import sys
 
-def find_videos(base_path='videos', extensions=('.mkv', '.mp4', '.avi')):
+
+def find_videos(
+    base_path: str = "videos", extensions: list[str] = (".mkv", ".mp4", ".avi")
+) -> list[Path]:
     """Find all video files recursively"""
-    videos = []
-    base = Path(base_path)
+    videos: list[Path] = []
+    base: Path = Path(base_path)
 
     # Check if the directory exists
     if not base.exists():
@@ -19,13 +21,14 @@ def find_videos(base_path='videos', extensions=('.mkv', '.mp4', '.avi')):
         return []
 
     for ext in extensions:
-        videos.extend(base.rglob(f'*{ext}'))
+        videos.extend(base.rglob(f"*{ext}"))
 
     return sorted(videos)
 
-def select_video():
+
+def select_video() -> Path | int | None:
     """Interactive video selection"""
-    videos = find_videos()
+    videos: list[Path] = find_videos()
 
     if not videos:
         print("No videos found!")
@@ -36,37 +39,38 @@ def select_video():
     for idx, video in enumerate(videos, 1):
         # Show relative path for cleaner display
         try:
-            rel_path = video.relative_to(Path.cwd())
+            rel_path: Path = video.relative_to(Path.cwd())
             print(f"{idx}. {video.name} (in {rel_path.parent})")
         except ValueError:
             print(f"{idx}. {video.name} ({video.parent})")
 
     while True:
         try:
-            choice = input("\nSelect video number (or 'q' to quit): ").strip()
-            if choice.lower() == 'q':
+            choice: str = input("\nSelect video number (or 'q' to quit): ").strip()
+            if choice.lower() == "q":
                 return None
 
-            if choice.lower() == 'rand':
-                return videos[np.random.randint(0, len(videos)-1)]
+            if choice.lower() == "rand":
+                return videos[np.random.randint(0, len(videos) - 1)]
 
             if int(choice) == 0:
                 return 0
 
-            idx = int(choice) - 1
+            idx: int = int(choice) - 1
             if 0 <= idx < len(videos):
                 return videos[idx]
             else:
                 print(f"Please enter a number between 1 and {len(videos)}")
         except ValueError:
             print("Please enter a valid number")
-            return videos[np.random.randint(0, len(videos)-1)]
+            return videos[np.random.randint(0, len(videos) - 1)]
+
 
 # Load a pretrained YOLOv8 model
 # model = YOLO("ts341_project/Anto/best_yolo8s_pretrained_model.pt")
-model = YOLO("ts341_project/execution/best_weights_finetuned.pt")
+model: YOLO = YOLO("ts341_project/execution/best_weights_finetuned.pt")
 
-video_path = select_video()
+video_path: Path | int | None = select_video()
 
 if video_path is None:
     print("No video selected. Exiting.")
@@ -75,10 +79,10 @@ if video_path is None:
 print(f"\n✓ Selected: {video_path}")
 
 # Open video file
-if video_path == 0 :
-    cap = cv2.VideoCapture(0)
-else :
-    cap = cv2.VideoCapture(str(video_path))
+if video_path == 0:
+    cap: cv2.VideoCapture = cv2.VideoCapture(0)
+else:
+    cap: cv2.VideoCapture = cv2.VideoCapture(str(video_path))
 
 # Check if video opened successfully
 if not cap.isOpened():
@@ -86,40 +90,54 @@ if not cap.isOpened():
     sys.exit(1)
 
 # Get video properties
-fps = cap.get(cv2.CAP_PROP_FPS)
-width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+fps: float = cap.get(cv2.CAP_PROP_FPS)
+width: int = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height: int = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
 print(f"Video info: {fps:.2f} FPS, Resolution: {width}x{height}")
 
 # === CONFIGURATION: Process one frame every X seconds ===
-PROCESS_INTERVAL_SECONDS = 2  # Change this value as needed
-frames_to_skip = int(fps * PROCESS_INTERVAL_SECONDS)
+PROCESS_INTERVAL_SECONDS: int = 2  # Change this value as needed
+# frames_to_skip: int = int(fps * PROCESS_INTERVAL_SECONDS)
+frames_to_skip: int = 1
 
-print(f"Processing 1 frame every {PROCESS_INTERVAL_SECONDS} seconds (every {frames_to_skip} frames)")
+print(
+    f"Processing 1 frame every {PROCESS_INTERVAL_SECONDS} seconds (every {frames_to_skip} frames)"
+)
 print("Processing video... Press 'q' to quit\n")
 
-frame_count = 0
-processed_count = 0
+frame_count: int = 0
+processed_count: int = 0
 
 while True:
+    ret: bool
+    frame: np.ndarray
     ret, frame = cap.read()
     if not ret:
-        print(f"\nEnd of video reached")
+        print("\nEnd of video reached")
         break
 
     # Only process every Nth frame
     if frame_count % frames_to_skip == 0:
         # Run YOLOv8 inference on the frame
         results = model(frame, show=False)
-        annotated_frame = results[0].plot()
+        annotated_frame: np.ndarray = results[0].plot()
         annotated_frame = cv2.resize(annotated_frame, (1280, 720))
 
         # Display processing info on frame
-        timestamp = frame_count / fps
-        info_text = f"Time: {timestamp:.2f}s | Frame: {frame_count} | Processed: {processed_count}"
-        cv2.putText(annotated_frame, info_text,
-                    (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        timestamp: float = frame_count / fps
+        info_text: str = (
+            f"Time: {timestamp:.2f}s | Frame: {frame_count} | Processed: {processed_count}"
+        )
+        cv2.putText(
+            annotated_frame,
+            info_text,
+            (10, 30),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (0, 255, 0),
+            2,
+        )
 
         cv2.imshow("YOLO Detection", annotated_frame)
         print(f"Processed frame {frame_count} at {timestamp:.2f}s")
@@ -128,7 +146,7 @@ while True:
     frame_count += 1
 
     # Press 'q' to quit (small delay to allow key detection)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if cv2.waitKey(1) & 0xFF == ord("q"):
         print("\nStopped by user")
         break
 
