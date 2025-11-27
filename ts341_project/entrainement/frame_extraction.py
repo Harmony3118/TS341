@@ -1,6 +1,5 @@
 import cv2
 from pathlib import Path
-import numpy as np
 
 
 def extract_frames(video_path, output_dir, interval_seconds=2):
