@@ -17,9 +17,16 @@ flask = "^2.3.3"
 opencv-python = "^4.12"
 matplotlib = "^3.10.7"
 ultralytics = "^8.3.0"
+scikit-learn = "^1.7.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4"
 
 [tool.poetry.scripts]
 yolo = "ts341_project.yolo_plus_imm:main"
+main = "ts341.app:main"
+
+[dependency-groups]
+dev = [
+    "pre-commit (>=4.4.0,<5.0.0)"
+]

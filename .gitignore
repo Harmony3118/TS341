@@ -176,3 +176,11 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+
+ts341_project/entrainement/fix_label_classes.py
+ts341_project/entrainement/finetune_yolo.py
+ts341_project/entrainement/train_yolo.py
+ts341_project/entrainement/frame_extraction.py
+ts341_project/entrainement/merge_labeled_batches.py
+ts341_project/entrainement/split_for_labeling.py
+ts341_project/entrainement/clean_dataset.py
