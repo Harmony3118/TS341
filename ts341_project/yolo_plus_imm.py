@@ -9,25 +9,31 @@ import math
 # 1. Camera choice
 # ================
 print("Choose a camera model :")
-print("1 = e-CAM20")
-print("2 = Wide e-CAM")
-choice = input("Camera (1/2) : ").strip()
+print("0 = Wide e-CAM")
+print("1 = Narrow e-CAM")
+print("2 = e-CAM20")
+choice = input("Camera : ").strip()
+
+if choice == "0":
+    # -------- Wide e-CAM --------
+    image_width_px  = 3840
+    image_height_px = 2160
+    FOV_v_deg = 67.04 # Vertical FOV
+    print("Selected camera : Wide e-CAM")
 
 if choice == "1":
+    # -------- Narrow e-CAM --------
+    image_width_px  = 3840
+    image_height_px = 2160
+    FOV_v_deg = 38.83
+    print("Selected camera : Narrow e-CAM")
+
+elif choice == "2":
     # -------- e-CAM20 --------
     image_width_px  = 2432
     image_height_px = 2048
-    FOV_v_deg = 67          # Vertical FOV
-    H_drone = 0.1352        # Height in metters of the drone
+    FOV_v_deg = 67
     print("Selected camera : e-CAM20")
-
-elif choice == "2":
-    # -------- Wide e-CAM --------
-    image_width_px  = 2432
-    image_height_px = 2048
-    FOV_v_deg = 67.04
-    H_drone = 0.1352
-    print("Selected camera : Wide e-CAM")
 
 else:
     print("Invalid choice.")
@@ -51,6 +57,8 @@ f = image_height_px / (2 * math.tan(FOV_v_rad / 2))
 # Image center
 cx0 = image_width_px / 2
 cy0 = image_height_px / 2
+
+H_drone = 0.1352 # Height in metters of the drone
 
 
 # 4. YOLO + Tracker loading
