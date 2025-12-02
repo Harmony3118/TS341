@@ -15,10 +15,15 @@ def bbox_wh(bbox):
 
 
 def iou(b1, b2):
-    x1 = max(b1[0], b2[0]); y1 = max(b1[1], b2[1])
-    x2 = min(b1[2], b2[2]); y2 = min(b1[3], b2[3])
-    inter_w = max(0.0, x2 - x1); inter_h = max(0.0, y2 - y1)
+    x1 = max(b1[0], b2[0])
+    y1 = max(b1[1], b2[1])
+    x2 = min(b1[2], b2[2])
+    y2 = min(b1[3], b2[3])
+
+    inter_w = max(0.0, x2 - x1)
+    inter_h = max(0.0, y2 - y1)
     inter = inter_w * inter_h
+
     a1 = max(1e-6, (b1[2]-b1[0])*(b1[3]-b1[1]))
     a2 = max(1e-6, (b2[2]-b2[0])*(b2[3]-b2[1]))
     return inter / (a1 + a2 - inter + 1e-9)
@@ -60,8 +65,8 @@ class Kalman:
         S = self.H.dot(self.P).dot(self.H.T) + self.R
         K = self.P.dot(self.H.T).dot(np.linalg.inv(S))
         self.state = self.state + K.dot(y)
-        I = np.eye(4)
-        self.P = (I - K.dot(self.H)).dot(self.P)
+        identity = np.eye(4)
+        self.P = (identity - K.dot(self.H)).dot(self.P)
 
     def mahalanobis_distance(self, meas_center):
         z = np.array([meas_center[0], meas_center[1]])
@@ -91,7 +96,9 @@ class KalmanCA:
             [0, 0, 0, 0, 0, 1]
         ], dtype=float)
         # observe x,y
-        self.H = np.zeros((2,6)); self.H[0,0]=1; self.H[1,1]=1
+        self.H = np.zeros((2,6))
+        self.H[0,0]=1
+        self.H[1,1]=1
 
         self.P = np.eye(6) * 300.0
         self.Q = np.eye(6) * process_noise_scale
@@ -108,8 +115,8 @@ class KalmanCA:
         S = self.H.dot(self.P).dot(self.H.T) + self.R
         K = self.P.dot(self.H.T).dot(np.linalg.inv(S))
         self.state = self.state + K.dot(y)
-        I = np.eye(6)
-        self.P = (I - K.dot(self.H)).dot(self.P)
+        identity = np.eye(6)
+        self.P = (identity - K.dot(self.H)).dot(self.P)
 
     def mahalanobis_distance(self, meas_center):
         z = np.array([meas_center[0], meas_center[1]])

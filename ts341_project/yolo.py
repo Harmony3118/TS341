@@ -2,7 +2,6 @@
 
 import cv2
 from ultralytics import YOLO
-import numpy as np
 
 # Load a pretrained YOLOv8 model
 # Options: 'yolov8n.pt', 'yolov8s.pt', 'yolov8m.pt', etc.

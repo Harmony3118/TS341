@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.spatial.distance import cdist
 
 class Track:
     """Représente un objet suivi avec un IMM multi-modèles."""
@@ -83,7 +82,6 @@ class SimpleTrack:
         detections : liste de bbox [[x1,y1,x2,y2], ...]
         Retourne une liste de tracks avec ID et bbox mises à jour.
         """
-        updated_tracks = []
 
         # Si aucun track existant, créer de nouveaux tracks
         if len(self.tracks) == 0:
@@ -93,7 +91,6 @@ class SimpleTrack:
             return [{'track_id': tr.track_id, 'bbox': tr.bbox} for tr in self.tracks]
 
         # Calculer IoU entre tracks prédits et detections
-        track_boxes = [tr.predict() for tr in self.tracks]
         unmatched_tracks = list(range(len(self.tracks)))
         unmatched_detections = list(range(len(detections)))
         matches = []
