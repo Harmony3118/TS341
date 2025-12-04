@@ -4,32 +4,45 @@ import cv2
 from ultralytics import YOLO
 from simple_bytetrack import SimpleTrack
 import math
-from typing import List, Tuple, Dict, Any
+from typing import List, Dict, Any
 
 
-# 1. Camera choice
+# 1. Video loading
 # ================
-print("Choose a camera model :")
+print("\nHello !\n\nSystem is ready for use. First, choose a video.")
+print("Notes: \n+ The video won't be loaded if there are whitespaces in the name.\n+ Do not include the extension, just the name is fine.\n")
+
+video: str = input("Video name : ").strip()
+cap: cv2.VideoCapture = cv2.VideoCapture(f"../videos/{video}.mp4")
+
+if not cap.isOpened():
+    print("\nError: Could not open video. You may have typed it wrong, or placed it in the wrong folder.\n\n")
+    exit()
+
+
+# 2. Camera choice
+# ================
+print("\nPerfect. Then, choose the corresponding camera model :")
 print("0 = Wide e-CAM")
 print("1 = Narrow e-CAM")
 print("2 = e-CAM20")
-choice: str = input("Camera : ").strip()
+camera: str = input("Camera : ").strip()
 
-if choice == "0":
+if camera == "0":
     # -------- Wide e-CAM --------
     image_width_px: int  = 3840
     image_height_px: int = 2160
     FOV_v_deg: float = 67.04  # Vertical FOV
     print("Selected camera : Wide e-CAM")
 
-if choice == "1":
+elif camera == "1":
     # -------- Narrow e-CAM --------
     image_width_px  = 3840
     image_height_px = 2160
     FOV_v_deg = 38.83
     print("Selected camera : Narrow e-CAM")
 
-elif choice == "2":
+elif camera == "2":
     # -------- e-CAM20 --------
     image_width_px  = 2432
     image_height_px = 2048
@@ -38,15 +51,6 @@ elif choice == "2":
 
 else:
     print("Invalid choice.")
-    exit()
-
-
-# 2. Video loading
-# ================
-cap: cv2.VideoCapture = cv2.VideoCapture("../videos/arriere.mp4")
-
-if not cap.isOpened():
-    print("Error: Could not open video.")
     exit()
 
 
