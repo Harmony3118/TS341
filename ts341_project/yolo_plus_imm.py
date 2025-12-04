@@ -1,10 +1,9 @@
 # pyright: reportPrivateImportUsage=none
-
 import cv2
 from ultralytics import YOLO
-from simple_bytetrack import SimpleTrack
+from simple_bytetrack import SingleObjectTracker
 import math
-from typing import List, Dict, Any
+from typing import List, Any, Tuple
 
 
 # 1. Video loading
@@ -71,7 +70,7 @@ else:
     model: YOLO = YOLO("best_finetuned_2.pt")
     print("Selected model: fine-tuned")
 
-tracker: SimpleTrack = SimpleTrack(max_age=50) # The age is the numer of frame the tracker will keep predicting
+BBox = Tuple[float, float, float, float] # Bounding Box for the tracker
 
 
 # 4. Video output
@@ -107,56 +106,69 @@ H_drone: float = 0.1352  # Height in metters of the drone
 # 6. Main loop
 # ============
 def main() -> None:
+    """
+    Run YOLO object detection and single-object tracking on a video.
+    Updates track, computes 3D position, optionally displays the video,
+    and prints X, Y, Z coordinates for each frame.
+    """
+
     frame_id: int = 0
+    tracker: SingleObjectTracker | None = None  # Will initialize after first detection
 
     while True:
-        ret: bool
-        frame: Any
         ret, frame = cap.read()
         if not ret:
             break
 
-        results: Any = model(frame, show=False, tracker=tracker)
+        results = model(frame, show=False)
 
-        # Detections
-        boxes: List[List[float]] = []
+        # Get first detection with confidence >= 0.5
+        detected_bbox: BBox | None = None
         for result in results:
             if result.boxes is not None:
                 for b, conf in zip(result.boxes.xyxy.cpu().numpy(),
                                    result.boxes.conf.cpu().numpy()):
                     if conf >= 0.5:
-                        boxes.append(b)
+                        detected_bbox = tuple(b)
+                        break
+            if detected_bbox is not None:
+                break
 
-        tracks: List[Dict[str, Any]] = tracker.update(boxes)
+        if detected_bbox is None:
+            # No detection in this frame, skip
+            continue
 
-        for tr in tracks:
-            x1, y1, x2, y2 = tr["bbox"]
-            cx: float = (x1 + x2) / 2
-            cy: float = (y1 + y2) / 2
-            h_px: float = y2 - y1
+        # Initialize tracker on first detection
+        if tracker is None:
+            tracker = SingleObjectTracker(detected_bbox)
 
-            # 7. 3D position estimation
-            # =========================
-            Z: float = f * H_drone / h_px
-            X: float = Z * (cx - cx0) / f
-            Y: float = Z * (cy - cy0) / f
+        # Update tracker
+        tracker.update(detected_bbox)
+        x1, y1, x2, y2 = tracker.bbox
+        cx = (x1 + x2) / 2
+        cy = (y1 + y2) / 2
+        h_px = y2 - y1
 
-            # Display
+        # 3D position computation
+        Z = f * H_drone / h_px
+        X = Z * (cx - cx0) / f
+        Y = Z * (cy - cy0) / f
+
+        print(f"[Frame {frame_id}]  X={X:.2f} m,  Y={Y:.2f} m,  Z={Z:.2f} m")
+        frame_id += 1
+
+        # Display
+        if show_video:
             cv2.circle(frame, (int(cx), int(cy)), 4, (0, 255, 0), -1)
             cv2.putText(frame,
-                        f"ID:{tr['track_id']} Z={Z:.2f}m",
+                        f"Z={Z:.2f}m",
                         (int(cx) + 5, int(cy) - 5),
                         cv2.FONT_HERSHEY_SIMPLEX,
                         0.5, (0, 255, 0), 1)
 
-            print(f"[Track {frame_id}]  X={X:.2f} m,  Y={Y:.2f} m,  Z={Z:.2f} m")
-            frame_id += 1
-
-        if show_video:
-            cv2.imshow("YOLO + IMM ByteTrack + Position 3D", frame)
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+            cv2.imshow("YOLO + Single Object Tracker + Position 3D", frame)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     cap.release()
     cv2.destroyAllWindows()
