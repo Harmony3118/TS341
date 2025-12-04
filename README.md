@@ -14,9 +14,11 @@ https://github.com/Harmony3118/TS341.git
 
 Place all your videos into the _"videos"_ folder. Name them with something short or easy to type, because the program will ask you which video you would like to use.
 
+**NB :** a video name should not include any whitespace.
+
 ### Run the drone detection script
 
-Once you have opened the project in your editor, you can follow these steps directly in the console.
+Once you have opened the project in your editor, you can follow these steps directly in the terminal.
 
 1. Enter the right **folder**
 
