@@ -4,8 +4,7 @@ import cv2
 from ultralytics import YOLO
 from single_object_tracker import SingleObjectTracker
 import math
-from tkinter import filedialog
-from typing import List, Any, Tuple
+from typing import Tuple
 
 
 # 1. Video loading
@@ -123,7 +122,7 @@ def main() -> None:
 
     if show_video:
         win_name = "YOLO + IMM ByteTrack + Position 3D"
-        cv2.namedWindow(win_name, cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
     centers = []
     frame_id: int = 0
     tracker: SingleObjectTracker | None = None  # Will initialize after first detection
@@ -167,7 +166,7 @@ def main() -> None:
         Z = f * H_drone / h_px
         X = Z * (cx - cx0) / f
         Y = Z * (cy - cy0) / f
-        
+
         # save tracked drone center
         centers.append((int(cx), int(cy)))
 
@@ -176,10 +175,10 @@ def main() -> None:
 
         # Display
         if show_video:
-            cv2.circle(frame, (int(cx), int(cy)), 4, (0, 255, 0), -1)
+            cv2.circle(frame, (int(cx), int(cy)), 8, (0, 255, 0), -1)
             cv2.putText(
                 frame,
-                f"ID:{tr['track_id']} Z={Z:.2f}m",
+                f"Z={Z:.2f}m",
                 (int(cx) + 5, int(cy) - 5),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 0.5,
@@ -189,6 +188,7 @@ def main() -> None:
 
             # cv2.imshow("YOLO + Single Object Tracker + Position 3D", frame)
             cv2.imshow(win_name, frame)
+            cv2.resizeWindow(win_name, 1280, 720)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
