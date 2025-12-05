@@ -26,6 +26,7 @@ def main():
     if not ret or not vc.isOpened():
         logging.error("Could not open video file {}".format(ref_video))
     og_shape = frame.shape
+    logging.debug(f"Original shape: {og_shape}")
 
     # read center of tracker data, truth and yolo
     print("Select labeled positions data JSON file")
@@ -41,10 +42,10 @@ def main():
     # it was captured on a (720, 480) frame
     # original capture size is
     # this phase isn't required if the ground truth data was correctly obtained
-    print(f"truth: {truth[0]} | yolo: {yolo[0]}")
+    logging.debug(f"truth: {truth[0]} | yolo: {yolo[0]}")
     truth[:, 0] = (og_shape[0] * truth[:, 0]) / 720
     truth[:, 1] = (og_shape[1] * truth[:, 1]) / 480
-    print(f"RESHAPED : truth: {truth[0]} | yolo: {yolo[0]}")
+    logging.debug(f"RESHAPED : truth: {truth[0]} | yolo: {yolo[0]}")
 
     # yolo data runs on the whole video
     # labeled data does not (because we were lazy labeling)
