@@ -13,7 +13,7 @@ La solution déployée permet effectivement la détection d’un drone dont les 
 Afin de détecter un drone et ses coordonnées dans l’espace, la solution finale se présente de la façon suivante :
 
 * Détection : YOLO  
-* Tracker : basé sur un filtre de Kalman  
+* Tracker : Bytetrack  
 * Position : Calcul grâce au *pinhole principle*, changement de repère grâce à la focale et à la taille du drone sur l’image *vs* dans la vie réelle.
 
 Voici un schéma simplifié qui illustre le fonctionnement général de l’algorithme : 
@@ -50,7 +50,7 @@ Avec le modèle YOLO qui permet de détecter dans une trame vidéo la position d
 * **Tracker simple |** Filtre de Kalman.  
 * **Tracker amélioré |** Proposition issue du cahier des charges. IMM issu d’une approche orientée sur Kalman en CV, CA ainsi qu’une implémentation d’IoU pour la détection de correspondance, tri et élagage.
 
-Le tracker implémenté dans la solution est le Tracker simple, qui utilise le principe des filtres de Kalman. Son fonctionnement est décrit en **Annexes**.
+Le tracker implémenté dans la solution est Bytetrack, comme suggéré dans le cahier des charges, mais sans IMM. Il remplit entièrement le rôle qu’on attend de lui pour compléter YOLO, en permettant parfois de garder le suivi d’un track lors d’une obstruction ou d’une perte de suivi du côté de YOLO.
 
 ### Métrique d’évaluation
 
@@ -64,9 +64,8 @@ Les données sont exportées en JSON sous un array avec la position 2D du drone 
 
 Sur une vidéo où un drone se déplace linéairement, on obtient les résultats suivants (avec une erreur en pixels, norme L2)
 ![](./evaluation.png)
-## Position du drone en environnement réel
 
-### Procédé
+## Position du drone en environnement réel
 
 Afin d’obtenir la position du drone dans l’espace, on récupère sa hauteur et sa position sur la trame lue. Ensuite, on effectue le rapport de la hauteur réelle du drone, dont le modèle est connu, sur sa hauteur en pixels, le tout modulé par le FOV vertical lié à la caméra choisie. On obtient la distance du drone à la caméra et on peut en déduire ses coordonnées dans l’espace. Les détails des calculs sont disponibles en **Annexes**.
 
@@ -84,26 +83,6 @@ Il existe une librairie Python, [Kornia](https://kornia.readthedocs.io/en/latest
 
 
 # Annexes
-
-## Tracker simple
-
-Le tracker implémenté dans la solution suit le principe d’un filtre de Kalman.
-
-### Initialisation
-
-Le tracker prend une *bounding box* initiale et en extrait le centre (cx,cy). Il crée un état de Kalman avec ces positions, et y initialise une vitesse nulle. Le bruit de mouvement Q a été défini à 0.01 et le bruit de mesure R à 1, par convention, mais ils peuvent être adaptés pour améliorer le modèle. On initialise aussi P, la covariance de l’état, H, la matrice d’extraction des centres et F, le modèle de vitesse constante.
-
-### Prédiction
-
-L’état se met à jour, on ajoute les vitesses aux positions pour prédire le pas suivant. L’incertitude augmente ensuite, selon le bruit de mouvement Q. Le centre prédit est renvoyé.
-
-### Mise à jour
-
-Le centre observé de l’objet est calculé en fonction de la *bounding box* donnée par l’algorithme qui utilise le tracker (dans notre cas YOLO), et le gain de Kalman K est calculé. Ce gain est influencé par la covariance de l’état, P, ainsi que par H et par R, le bruit de mesure.
-
-Ensuite, l’état est mis à jour en fonction du gain, et la *bounding box* est mise à jour pour correspondre au centre prédit.
-
-## 
 
 ## Calcul de la position 3D du drone
 
