@@ -25,7 +25,16 @@ Place all your videos into the _"videos"_ folder. Name them with something short
 **NB :** a video name should not include any whitespace.
 
 ### Run the drone detection script
+## Dockerfile
+Build the image & run it interactively
+```bash
+docker build . -t ts341
+docker run -it ts341
+```
+It will automatically run the script. Works in the same fashion as the development version.
+You can attach a docker volume into `:/app/videos` to put your own videos.
 
+## Development environment
 Once you have opened the project in your editor, you can follow these steps directly in the terminal.
 
 1. Enter the right **folder**
