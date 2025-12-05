@@ -24,7 +24,7 @@ pytest = "^7.4"
 
 [tool.poetry.scripts]
 yolo = "ts341_project.yolo_plus_imm:main"
-main = "ts341.app:main"
+evaluate = "ts341_project.tracker_evaluation:main"
 
 [dependency-groups]
 dev = [
