@@ -2,9 +2,10 @@
 import json
 import cv2
 from ultralytics import YOLO
-from single_object_tracker import SingleObjectTracker
+from ts341_project.single_object_tracker import SingleObjectTracker
 import math
 from typing import Tuple
+import logging
 
 
 def video_to_json_output(v_filename):
@@ -171,7 +172,7 @@ def main() -> None:
         # save tracked drone center
         centers.append((int(cx), int(cy)))
 
-        print(f"[Frame {frame_id}]  X={X:.2f} m,  Y={Y:.2f} m,  Z={Z:.2f} m")
+        logging.debug(f"[Frame {frame_id}]  X={X:.2f} m,  Y={Y:.2f} m,  Z={Z:.2f} m")
         frame_id += 1
 
         # Display
