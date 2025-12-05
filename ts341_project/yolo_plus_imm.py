@@ -1,21 +1,25 @@
 # pyright: reportPrivateImportUsage=none
 import cv2
 from ultralytics import YOLO
-from simple_bytetrack import SingleObjectTracker
+from single_object_tracker import SingleObjectTracker
 import math
 from typing import List, Any, Tuple
 
 
 # 1. Video loading
 # ================
-print("\nHello !\n\nSystem is ready for use. First, choose a video.\nFormat example : video_1.mkv")
+print(
+    "\nHello !\n\nSystem is ready for use. First, choose a video.\nFormat example : video_1.mkv"
+)
 print("Note: the video won't be loaded if there are whitespaces in the name.")
 
 video: str = input("\nVideo: ").strip()
 cap: cv2.VideoCapture = cv2.VideoCapture(f"../videos/{video}")
 
 if not cap.isOpened():
-    print("\nError: Could not open video. You may have typed it wrong, or placed it in the wrong folder.\n\n")
+    print(
+        "\nError: Could not open video. You may have typed it wrong, or placed it in the wrong folder.\n\n"
+    )
     exit()
 
 
@@ -29,21 +33,21 @@ camera: str = input("\nCamera: ").strip()
 
 if camera == "0":
     # -------- Wide e-CAM --------
-    image_width_px: int  = 3840
+    image_width_px: int = 3840
     image_height_px: int = 2160
     FOV_v_deg: float = 67.04  # Vertical FOV
     print("Selected camera: Wide e-CAM")
 
 elif camera == "1":
     # -------- Narrow e-CAM --------
-    image_width_px  = 3840
+    image_width_px = 3840
     image_height_px = 2160
     FOV_v_deg = 38.83
     print("Selected camera: Narrow e-CAM")
 
 elif camera == "2":
     # -------- e-CAM20 --------
-    image_width_px  = 2432
+    image_width_px = 2432
     image_height_px = 2048
     FOV_v_deg = 67
     print("Selected camera: e-CAM20")
@@ -55,7 +59,9 @@ else:
 
 # 3. YOLO Version
 # ===============
-print("\nThe detection works with the YOLO model. Which parameters would you like to try?")
+print(
+    "\nThe detection works with the YOLO model. Which parameters would you like to try?"
+)
 print("0 = Default parameters")
 print("1 = Fine-tuned parameters")
 yolo_param: str = input("\nParameters: ").strip()
@@ -70,7 +76,7 @@ else:
     model: YOLO = YOLO("best_finetuned_2.pt")
     print("Selected model: fine-tuned")
 
-BBox = Tuple[float, float, float, float] # Bounding Box for the tracker
+BBox = Tuple[float, float, float, float]  # Bounding Box for the tracker
 
 
 # 4. Video output
@@ -126,8 +132,9 @@ def main() -> None:
         detected_bbox: BBox | None = None
         for result in results:
             if result.boxes is not None:
-                for b, conf in zip(result.boxes.xyxy.cpu().numpy(),
-                                   result.boxes.conf.cpu().numpy()):
+                for b, conf in zip(
+                    result.boxes.xyxy.cpu().numpy(), result.boxes.conf.cpu().numpy()
+                ):
                     if conf >= 0.5:
                         detected_bbox = tuple(b)
                         break
@@ -160,14 +167,18 @@ def main() -> None:
         # Display
         if show_video:
             cv2.circle(frame, (int(cx), int(cy)), 4, (0, 255, 0), -1)
-            cv2.putText(frame,
-                        f"Z={Z:.2f}m",
-                        (int(cx) + 5, int(cy) - 5),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5, (0, 255, 0), 1)
+            cv2.putText(
+                frame,
+                f"Z={Z:.2f}m",
+                (int(cx) + 5, int(cy) - 5),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.5,
+                (0, 255, 0),
+                1,
+            )
 
             cv2.imshow("YOLO + Single Object Tracker + Position 3D", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
     cap.release()

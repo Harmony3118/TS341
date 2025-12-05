@@ -3,10 +3,12 @@ import numpy as np
 
 BBox = Tuple[float, float, float, float]
 
+
 class SingleObjectTracker:
     """
     Simple tracker for a single object using a constant velocity Kalman filter.
     """
+
     def __init__(self, init_bbox: BBox) -> None:
         self.bbox: BBox = init_bbox
 
@@ -25,13 +27,12 @@ class SingleObjectTracker:
         self.R = np.eye(2) * 1.0
 
         # Measurement matrix
-        self.H = np.array([[1, 0, 0, 0],
-                           [0, 1, 0, 0]])
+        self.H = np.array([[1, 0, 0, 0], [0, 1, 0, 0]])
 
         # State transition (will update vx, vy)
         self.F = np.eye(4)
-        self.F[0,2] = 1.0
-        self.F[1,3] = 1.0
+        self.F[0, 2] = 1.0
+        self.F[1, 3] = 1.0
 
     def predict(self) -> Tuple[float, float]:
         # Predict next state
@@ -59,5 +60,9 @@ class SingleObjectTracker:
         # Update bbox to match predicted center
         w = new_bbox[2] - new_bbox[0]
         h = new_bbox[3] - new_bbox[1]
-        self.bbox = (self.state[0] - w/2, self.state[1] - h/2,
-                     self.state[0] + w/2, self.state[1] + h/2)
+        self.bbox = (
+            self.state[0] - w / 2,
+            self.state[1] - h / 2,
+            self.state[0] + w / 2,
+            self.state[1] + h / 2,
+        )
