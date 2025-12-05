@@ -7,6 +7,11 @@ import math
 from typing import Tuple
 
 
+def video_to_json_output(v_filename):
+    """Given a video filename, return a new filename to output JSON data to"""
+    return v_filename.replace(".mp4", "_yolo.mp4.json")
+
+
 # 1. Video loading
 # ================
 print(
@@ -197,7 +202,7 @@ def main() -> None:
 
     # write list of centers to JSON file
     # to be used for performance measurement
-    with open(video_filename.replace(".mp4", "_yolo.mp4.json"), "w") as file:
+    with open(video_to_json_output(video_filename), "w") as file:
         file.write(json.dumps(centers))  # assume only one drone in image
 
 

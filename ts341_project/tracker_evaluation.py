@@ -1,63 +1,63 @@
-"""
-# Input -----------------
+def main():
+    from yolo_plus_imm import video_to_json_output
+    import json
+    import logging
+    from tkinter import filedialog
+    import cv2 as cv
+    import numpy as np
+    import matplotlib.pyplot as plt
 
-- A list of the real position of the drone per frame for each video
-- The list of videos
-- yolo model (model = YOLO("best_yolo8s.pt"))
-- the two trackers : 
-    - simple_tracker = SimpleTrack(max_age=80)
-    - imm_tracker = IMMByteTrack(max_age=100))
+    print("Select reference video")
+    ref_video = filedialog.askopenfilename()
+    vc = cv.VideoCapture(ref_video)
+    ret, frame = vc.read()
+    if not ret or not vc.isOpened():
+        logging.error("Could not open video file {}".format(ref_video))
+    og_shape = frame.shape
 
-# Objects -----------------
-- A named-tupple that will contain each detected position (X,Y) of the center of the drone for each frame, according to each tracker, for each video.
-    Note on the videos : they should all have an ID, starting from 1.
-- A list of the real position of the drone per frame for each video
-- The total number of videos. 
+    # read center of tracker data, truth and yolo
+    print("Select labeled positions data JSON file")
+    data_truth_filename = video_to_json_output(ref_video)
+    f_truth = None
+    try:
+        f_truth = open(data_truth_filename)
+    except OSError:
+        logging.error(f"File not found : {data_truth_filename}")
+        exit(1)
 
-# Algorithm -----------------
+    truth = np.array(json.loads("".join(f_truth.readlines())))
+    print("Select YOLO-estimated positions data JSON file")
+    data_yolo_filename = filedialog.askopenfilename()
+    f_yolo = open(data_yolo_filename)
+    yolo = np.array(json.loads("".join(f_yolo.readlines())))
 
-function user_choice : 
-    ask to choose to display graphs
-    if the user wants to choose :
-        choose for which video he wants to see the results, thanks to their ID (given total number of video + 1)
-        return the chosen video ID
-    return 0
+    # re-scale ground truth data
+    # it was captured on a (720, 480) frame
+    # original capture size is
+    # this phase isn't required if the ground truth data was correctly obtained
+    print(f"truth: {truth[0]} | yolo: {yolo[0]}")
+    truth[:, 0] = (og_shape[0] * truth[:, 0]) / 720
+    truth[:, 1] = (og_shape[1] * truth[:, 1]) / 480
+    print(f"RESHAPED : truth: {truth[0]} | yolo: {yolo[0]}")
 
-function compute_positions :
-    for each video, 
-        for each frame, 
-            expected_position = the real position (X, Y) of the center of the drone
+    # yolo data runs on the whole video
+    # labeled data does not (because we were lazy labeling)
+    # trim yolo data
+    yolo = yolo[: len(truth)]
+    assert (
+        len(yolo) != 0
+    ), "Error while trimming YOLO tracker data : truth data array empty"
 
-            for each tracker,
-                detected_position = get the coordinates (X,Y) of the center of the drone according to the tracker
-                rmse = np.sqrt(np.mean((expected_position - detected_position)**2, axis=0)) # compute the Root Mean Square Error
+    # compute error to truth
+    diff = np.power(np.linalg.norm(yolo - truth, axis=1), 2)
 
-                add the detected position and the rmse to their respective tab
-        
-        for each tracker :
-            compute the mean of the RMSE
-
-    for each tracker : 
-        compute the mean of the means of the RMSE
-
-user_choice()
-if the answer is not 0 :
-    for the chosen video :
-        plot the results in the same figure : 
-            - The first subfigure on the top should display the deteced position of each tracker, according to each frame in absisca
-            - The second subfigure on the bottom should display the RMSE of each tracker, according to each frame in absisca
-
-for each tracker :
-    print the mean RMSE
-            
--> We should select the one for which the RMSE is the weakest.
-    
-# Output -----------------
-
-- A graph of position (X, Y) comparison, giving for each frame : 
-    - The expected (X, Y) position of the drone on the frame
-    - The (X, Y) position givent by each tracker
-
-- The RMSE between each tracker and the expected position, for each frame.
-
-"""
+    f_truth.close()
+    f_yolo.close()
+    print(f"RMSE: {np.sqrt(np.sum(diff) / len(diff))}")
+    plt.plot(np.arange(len(yolo)), diff)
+    plt.xlabel("Frame k")
+    plt.ylabel("Pixel distance error (normalized)")
+    plt.title(
+        "Squared error accuracy in position between YOLO + tracker and ground truth"
+    )
+    plt.show()
