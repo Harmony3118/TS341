@@ -12,7 +12,7 @@ def try_open(f_name: str):
 
 
 def main():
-    from yolo_plus_imm import video_to_json_output
+    from ts341_project.yolo_plus_imm import video_to_json_output
     import json
     from tkinter import filedialog
     import cv2 as cv
@@ -39,18 +39,20 @@ def main():
     yolo = np.array(json.loads("".join(f_yolo.readlines())))
 
     # re-scale ground truth data
-    # it was captured on a (720, 480) frame
+    # it was captured on a frame size divided by 2 from original
     # original capture size is
     # this phase isn't required if the ground truth data was correctly obtained
     logging.debug(f"truth: {truth[0]} | yolo: {yolo[0]}")
-    truth[:, 0] = (og_shape[0] * truth[:, 0]) / 720
-    truth[:, 1] = (og_shape[1] * truth[:, 1]) / 480
+    # truth[:, 0] = (og_shape[0] * truth[:, 0]) / 720
+    # truth[:, 1] = (og_shape[1] * truth[:, 1]) / 480
+    truth *= 2
     logging.debug(f"RESHAPED : truth: {truth[0]} | yolo: {yolo[0]}")
 
     # yolo data runs on the whole video
     # labeled data does not (because we were lazy labeling)
-    # trim yolo data
+    # trim yolo data & truth data
     yolo = yolo[: len(truth)]
+    truth = truth[: len(yolo)]
     assert (
         len(yolo) != 0
     ), "Error while trimming YOLO tracker data : truth data array empty"
@@ -65,6 +67,6 @@ def main():
     plt.xlabel("Frame k")
     plt.ylabel("Pixel distance error (normalized)")
     plt.title(
-        "Squared error accuracy in position between YOLO + tracker and ground truth"
+        "Squared error accuracy in position between\nYOLO + tracker and ground truth"
     )
     plt.show()
