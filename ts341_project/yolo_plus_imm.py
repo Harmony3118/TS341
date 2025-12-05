@@ -16,7 +16,8 @@ print(
 print("Note: the video won't be loaded if there are whitespaces in the name.")
 
 video: str = input("\nVideo: ").strip()
-cap: cv2.VideoCapture = cv2.VideoCapture(f"../videos/{video}")
+video_filename: str = f"../videos/{video}"
+cap: cv2.VideoCapture = cv2.VideoCapture(video_filename)
 
 if not cap.isOpened():
     print(
