@@ -1,0 +1,4 @@
+[submodule "anytrack"]
+	path = anytrack
+	url = git@github.com:Wanchai290/anytrack.git
+    branch = manual-pos-labeling
