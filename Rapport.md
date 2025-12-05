@@ -63,7 +63,7 @@ Les données sont exportées en JSON sous un array avec la position 2D du drone 
 ### Résultats et limites
 
 Sur une vidéo où un drone se déplace linéairement, on obtient les résultats suivants (avec une erreur en pixels, norme L2)
-
+![](./evaluation.png)
 ## Position du drone en environnement réel
 
 ### Procédé
@@ -82,11 +82,6 @@ Bien qu’ayant une certaine marge d’erreur pouvant parfois varier sur quelque
 
 Il existe une librairie Python, [Kornia](https://kornia.readthedocs.io/en/latest/geometry.camera.pinhole.html), qui peut aussi être utilisée pour calculer la position dans l’espace. Il pourrait être intéressant de l’implémenter dans une seconde version.
 
-# Limites et discussion
-
-sur les limites et perspectives d’amélioration
-
-# 
 
 # Annexes
 
