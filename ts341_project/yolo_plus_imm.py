@@ -2,7 +2,6 @@
 import json
 import cv2
 from ultralytics import YOLO
-from ts341_project.single_object_tracker import SingleObjectTracker
 import math
 from typing import Tuple
 import logging
@@ -127,7 +126,7 @@ def main() -> None:
         cv2.namedWindow(win_name, cv2.WINDOW_NORMAL)
     centers = []
     frame_id: int = 0
-    tracker: SingleObjectTracker | None = None  # Will initialize after first detection
+    target_id = None
 
     while True:
         ret, frame = cap.read()
@@ -138,28 +137,41 @@ def main() -> None:
 
         # Get first detection with confidence >= 0.5
         detected_bbox: BBox | None = None
+
         for result in results:
-            if result.boxes is not None:
-                for b, conf in zip(
-                    result.boxes.xyxy.cpu().numpy(), result.boxes.conf.cpu().numpy()
-                ):
-                    if conf >= 0.5:
-                        detected_bbox = tuple(b)
-                        break
+            if result.boxes is None:
+                continue
+
+            boxes = result.boxes.xyxy.cpu().numpy()
+            confs = result.boxes.conf.cpu().numpy()
+            ids = (
+                result.boxes.id.cpu().numpy()
+                if result.boxes.id is not None
+                else [None] * len(boxes)
+            )
+
+            for b, conf, tid in zip(boxes, confs, ids):
+                if conf < 0.6:
+                    continue
+
+                # Select first object to track
+                if target_id is None:
+                    target_id = tid
+
+                # Only track the selected object
+                if tid == target_id:
+                    detected_bbox = tuple(b)
+                    break
+
             if detected_bbox is not None:
                 break
 
         if detected_bbox is None:
-            # No detection in this frame, skip
+            # Skip frame if object not detected
             continue
-
         # Initialize tracker on first detection
-        if tracker is None:
-            tracker = SingleObjectTracker(detected_bbox)
 
-        # Update tracker
-        tracker.update(detected_bbox)
-        x1, y1, x2, y2 = tracker.bbox
+        x1, y1, x2, y2 = detected_bbox
         cx = (x1 + x2) / 2
         cy = (y1 + y2) / 2
         h_px = y2 - y1
