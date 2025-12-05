@@ -1,7 +1,19 @@
+import logging
+
+
+def try_open(f_name: str):
+    f_truth = None
+    try:
+        f_truth = open(f_name)
+    except OSError:
+        logging.error(f"File not found : {f_name}")
+        exit(1)
+    return f_truth
+
+
 def main():
     from yolo_plus_imm import video_to_json_output
     import json
-    import logging
     from tkinter import filedialog
     import cv2 as cv
     import numpy as np
@@ -17,18 +29,12 @@ def main():
 
     # read center of tracker data, truth and yolo
     print("Select labeled positions data JSON file")
-    data_truth_filename = video_to_json_output(ref_video)
-    f_truth = None
-    try:
-        f_truth = open(data_truth_filename)
-    except OSError:
-        logging.error(f"File not found : {data_truth_filename}")
-        exit(1)
-
+    data_truth_filename = filedialog.askopenfilename()
+    f_truth = try_open(data_truth_filename)
     truth = np.array(json.loads("".join(f_truth.readlines())))
-    print("Select YOLO-estimated positions data JSON file")
-    data_yolo_filename = filedialog.askopenfilename()
-    f_yolo = open(data_yolo_filename)
+
+    data_yolo_filename = video_to_json_output(ref_video)
+    f_yolo = try_open(data_yolo_filename)
     yolo = np.array(json.loads("".join(f_yolo.readlines())))
 
     # re-scale ground truth data
@@ -49,11 +55,11 @@ def main():
     ), "Error while trimming YOLO tracker data : truth data array empty"
 
     # compute error to truth
-    diff = np.power(np.linalg.norm(yolo - truth, axis=1), 2)
+    diff = np.sqrt(np.linalg.norm(np.power(yolo, 2) - np.power(truth, 2), axis=1))
 
     f_truth.close()
     f_yolo.close()
-    print(f"RMSE: {np.sqrt(np.sum(diff) / len(diff))}")
+    logging.info(f"RMSE: {np.sqrt(np.sum(diff) / len(diff))}")
     plt.plot(np.arange(len(yolo)), diff)
     plt.xlabel("Frame k")
     plt.ylabel("Pixel distance error (normalized)")

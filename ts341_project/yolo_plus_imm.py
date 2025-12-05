@@ -12,118 +12,114 @@ def video_to_json_output(v_filename):
     return v_filename.replace(".mp4", "_yolo.mp4.json")
 
 
-# 1. Video loading
-# ================
-print(
-    "\nHello !\n\nSystem is ready for use. First, choose a video.\nFormat example : video_1.mkv"
-)
-print("Note: the video won't be loaded if there are whitespaces in the name.")
-
-video: str = input("\nVideo: ").strip()
-video_filename: str = f"../videos/{video}"
-cap: cv2.VideoCapture = cv2.VideoCapture(video_filename)
-
-if not cap.isOpened():
-    print(
-        "\nError: Could not open video. You may have typed it wrong, or placed it in the wrong folder.\n\n"
-    )
-    exit()
-
-
-# 2. Camera choice
-# ================
-print("\nVideo found.\nThen, choose the corresponding camera model:")
-print("0 = Wide e-CAM")
-print("1 = Narrow e-CAM")
-print("2 = e-CAM20")
-camera: str = input("\nCamera: ").strip()
-
-if camera == "0":
-    # -------- Wide e-CAM --------
-    image_width_px: int = 3840
-    image_height_px: int = 2160
-    FOV_v_deg: float = 67.04  # Vertical FOV
-    print("Selected camera: Wide e-CAM")
-
-elif camera == "1":
-    # -------- Narrow e-CAM --------
-    image_width_px = 3840
-    image_height_px = 2160
-    FOV_v_deg = 38.83
-    print("Selected camera: Narrow e-CAM")
-
-elif camera == "2":
-    # -------- e-CAM20 --------
-    image_width_px = 2432
-    image_height_px = 2048
-    FOV_v_deg = 67
-    print("Selected camera: e-CAM20")
-
-else:
-    print("Invalid choice.")
-    exit()
-
-
-# 3. YOLO Version
-# ===============
-print(
-    "\nThe detection works with the YOLO model. Which parameters would you like to try?"
-)
-print("0 = Default parameters")
-print("1 = Fine-tuned parameters")
-yolo_param: str = input("\nParameters: ").strip()
-
-if yolo_param == "0":
-    # -------- Default --------
-    model: YOLO = YOLO("best_yolo8s.pt")
-    print("Selected model: default")
-
-else:
-    # -------- Fine-tuned --------
-    model: YOLO = YOLO("best_finetuned_2.pt")
-    print("Selected model: fine-tuned")
-
-BBox = Tuple[float, float, float, float]  # Bounding Box for the tracker
-
-
-# 4. Video output
-# ===============
-print("\nWould you like to activate the video output?")
-print("0 = No")
-print("1 = Yes")
-video_output: str = input("\nVideo output: ").strip()
-
-if video_output == "0":
-    # -------- Off --------
-    show_video: bool = False
-    print("The video won't show up.\nQuit: 'Ctrl+C'")
-
-else:
-    # -------- On --------
-    show_video: bool = True
-    print("You will see the video.\nQuit: 'q'")
-
-
-# 5. Focal computation in px
-# ==========================
-FOV_v_rad: float = math.radians(FOV_v_deg)
-f: float = image_height_px / (2 * math.tan(FOV_v_rad / 2))
-
-# Image center
-cx0: float = image_width_px / 2
-cy0: float = image_height_px / 2
-
-H_drone: float = 0.1352  # Height in metters of the drone
-
-
-# 6. Main loop
+# Main loop
 # ============
 def main() -> None:
     """
-    Run YOLO object detection and single-object tracking on a video.
+    CLI to load necessary parameters, and
+    run YOLO object detection and single-object tracking on a video.
     Updates track, computes 3D position, optionally displays the video,
     and prints X, Y, Z coordinates for each frame.
     """
+
+    # 1. Video loading
+    # ================
+    print(
+        "\nHello !\n\nSystem is ready for use. First, choose a video.\nFormat example : video_1.mkv"
+    )
+    print("Note: the video won't be loaded if there are whitespaces in the name.")
+
+    video: str = input("\nVideo: ").strip()
+    video_filename: str = f"../videos/{video}"
+    cap: cv2.VideoCapture = cv2.VideoCapture(video_filename)
+
+    if not cap.isOpened():
+        print(
+            "\nError: Could not open video. You may have typed it wrong, or placed it in the wrong folder.\n\n"
+        )
+        exit()
+
+    # 2. Camera choice
+    # ================
+    print("\nVideo found.\nThen, choose the corresponding camera model:")
+    print("0 = Wide e-CAM")
+    print("1 = Narrow e-CAM")
+    print("2 = e-CAM20")
+    camera: str = input("\nCamera: ").strip()
+
+    if camera == "0":
+        # -------- Wide e-CAM --------
+        image_width_px: int = 3840
+        image_height_px: int = 2160
+        FOV_v_deg: float = 67.04  # Vertical FOV
+        print("Selected camera: Wide e-CAM")
+
+    elif camera == "1":
+        # -------- Narrow e-CAM --------
+        image_width_px = 3840
+        image_height_px = 2160
+        FOV_v_deg = 38.83
+        print("Selected camera: Narrow e-CAM")
+
+    elif camera == "2":
+        # -------- e-CAM20 --------
+        image_width_px = 2432
+        image_height_px = 2048
+        FOV_v_deg = 67
+        print("Selected camera: e-CAM20")
+
+    else:
+        print("Invalid choice.")
+        exit()
+
+    # 3. YOLO Version
+    # ===============
+    print(
+        "\nThe detection works with the YOLO model. Which parameters would you like to try?"
+    )
+    print("0 = Default parameters")
+    print("1 = Fine-tuned parameters")
+    yolo_param: str = input("\nParameters: ").strip()
+
+    if yolo_param == "0":
+        # -------- Default --------
+        model: YOLO = YOLO("best_yolo8s.pt")
+        print("Selected model: default")
+
+    else:
+        # -------- Fine-tuned --------
+        model: YOLO = YOLO("best_finetuned_2.pt")
+        print("Selected model: fine-tuned")
+
+    BBox = Tuple[float, float, float, float]  # Bounding Box for the tracker
+
+    # 4. Video output
+    # ===============
+    print("\nWould you like to activate the video output?")
+    print("0 = No")
+    print("1 = Yes")
+    video_output: str = input("\nVideo output: ").strip()
+
+    if video_output == "0":
+        # -------- Off --------
+        show_video: bool = False
+        print("The video won't show up.\nQuit: 'Ctrl+C'")
+
+    else:
+        # -------- On --------
+        show_video: bool = True
+        print("You will see the video.\nQuit: 'q'")
+
+    # 5. Focal computation in px
+    # ==========================
+    FOV_v_rad: float = math.radians(FOV_v_deg)
+    f: float = image_height_px / (2 * math.tan(FOV_v_rad / 2))
+
+    # Image center
+    cx0: float = image_width_px / 2
+    cy0: float = image_height_px / 2
+
+    H_drone: float = 0.1352  # Height in metters of the drone
 
     if show_video:
         win_name = "YOLO + IMM ByteTrack + Position 3D"
